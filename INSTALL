@@ -1,0 +1,8 @@
+
+
+# Cross-Compilation
+In order to cross compile, you would need to have `mingw-w64-gcc` from the Arch repositories
+
+Get the windows binaries from https://libusb.info/
+
+Paste the contents of libusb-MinGW-x64 folder into /usr/x86_64-w64-mingw32 (MINGW_DIR in Makefile)
