@@ -45,6 +45,7 @@ func main() {
 		fmt.Printf("Usage: %s [flags...]\n", os.Args[0])
 		flag.PrintDefaults()
 	}
+	flag.Parse()
 
 	// Initialize TAP virtual network interface
 	cfg := GetConfig(iface_name, use_tun, persist, use_multiqueue, ip_address)
@@ -55,7 +56,6 @@ func main() {
 	defer tap_iface.Close()
 	log.Printf("Interface Name: %s\n", tap_iface.Name())
 
-	flag.Parse()
 	i := 0
 	for {
 		// closure to defer cleanup
