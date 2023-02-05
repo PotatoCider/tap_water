@@ -29,6 +29,7 @@ func main() {
 	var wait_plug bool
 	var dhcp bool
 	var use_stream bool
+	var tuntaposx bool
 	flag.IntVar(&device_index, "i", 0, "device index (if there is a device vid:pid collision)")
 	flag.StringVar(&iface_name, "I", "", "interface name (e.g. tap0)")
 	flag.StringVar(&ip_address, "ip", "", "ip address in cidr notation (e.g. 192.168.10.2/24)")
@@ -41,6 +42,8 @@ func main() {
 	flag.BoolVar(&wait_plug, "wait", false, "Wait for USB plug-in")
 	flag.BoolVar(&dhcp, "dhcp", false, "Use DHCP")
 	flag.BoolVar(&use_stream, "stream", false, "Use Buffering (needed when both sides are running tap_water")
+	flag.BoolVar(&tuntaposx, "tuntaposx", false, "Use macos tuntaposx driver")
+
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s [flags...]\n", os.Args[0])
 		flag.PrintDefaults()
@@ -48,10 +51,17 @@ func main() {
 	flag.Parse()
 
 	// Initialize TAP virtual network interface
-	cfg := GetConfig(iface_name, use_tun, persist, use_multiqueue, ip_address)
+
+	cfg := GetPlatformConfig(iface_name, persist, use_multiqueue, ip_address, tuntaposx)
+	if use_tun {
+		cfg.DeviceType = water.TUN
+	} else {
+		cfg.DeviceType = water.TAP
+	}
+
 	tap_iface, err := water.New(cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("water.New(%v): %s\n", cfg, err)
 	}
 	defer tap_iface.Close()
 	log.Printf("Interface Name: %s\n", tap_iface.Name())
@@ -92,12 +102,26 @@ func main() {
 				log.Fatalf("dev.SetAutoDetach(true): %v", err)
 			}
 
-			// Claim interface 0
-			dev_iface, done, err := dev.DefaultInterface()
-			if err != nil {
-				log.Fatalf("%s.DefaultInterface(): %v", dev, err)
+			var dev_iface *gousb.Interface
+			if runtime.GOOS == "darwin" {
+				cfg, err := dev.Config(1)
+				if err != nil {
+					log.Fatalf("%s.Config(1): %v", dev, err)
+				}
+				defer cfg.Close()
+				dev_iface, err = cfg.Interface(0, 0)
+				if err != nil {
+					log.Fatalf("%s.Interface(0, 0): %v", cfg, err)
+				}
+			} else {
+				// Claim interface 0
+				var done func()
+				dev_iface, done, err = dev.DefaultInterface()
+				if err != nil {
+					log.Fatalf("%s.DefaultInterface(): %v", dev, err)
+				}
+				defer done()
 			}
-			defer done()
 
 			// Wait for remote plugin
 			// WaitForRemotePlug(dev)
@@ -178,6 +202,17 @@ func main() {
 					if dns_address != "" {
 						if err := run_command("netsh", "interface", "ip", "set", "dnsservers", name, "static", dns_address, "primary"); err != nil {
 							fmt.Printf("set dns: %s\n", err)
+						}
+					}
+				case "darwin":
+					if dhcp {
+						if err := run_command("ipconfig", "set", tap_iface.Name(), "DHCP"); err != nil {
+							fmt.Printf("dhcp: %s\n", err)
+						}
+					}
+					if ip_address != "" {
+						if err := run_command("ifconfig", tap_iface.Name(), "inet", ip_address); err != nil {
+							fmt.Printf("set ip: %s\n", err)
 						}
 					}
 				}
