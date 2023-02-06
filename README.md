@@ -1,4 +1,4 @@
-# `tap_water`: A fast TUN/TAP userspace driver for PL25A1-based cables
+## `tap_water`: A fast TUN/TAP userspace driver for PL25A1-based cables
 
 ## Usage
 
