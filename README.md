@@ -12,10 +12,23 @@ go build
 # Run it
 sudo ./tap_water
 
+# Cross-compile for Windows
+make windows
 ```
 Note that `root` is required for managing interfaces in Linux.
 
 Administrator privileges are not needed on Windows, unless network interface configuration flags are passed (i.e. `-ip`, `-gw`) 
+
+## Build Requirements
+
+You would need to have `libusb` installed to build this repository.
+
+### Windows Cross-Compilation
+In order to cross compile, you would need to have `mingw-w64-gcc` from the Arch repositories
+
+Because the libusb library is statically linked for Windows, you would need to get the libusb windows binaries from https://libusb.info/
+
+Paste the contents of libusb-MinGW-x64 folder into /usr/x86_64-w64-mingw32 (MINGW_DIR in Makefile)
 
 ## Installation
 
@@ -23,18 +36,14 @@ Administrator privileges are not needed on Windows, unless network interface con
 Works out of the box with Linux.
 
 ### Windows
-You would need to install the OpenVPN TAP drivers from https://openvpn.net/community-downloads/. The OpenVPN client is not needed.
+You would need to install the [OpenVPN TAP drivers](https://openvpn.net/community-downloads/). The OpenVPN client is not needed.
 
 ### MacOS
-You would need to install the Tunnelblink tun/tap extensions.
+You would need to install the [Tunnelblink](https://tunnelblick.net/downloads.html) tun/tap extensions.
 
-### Cross-Compilation
-In order to cross compile, you would need to have `mingw-w64-gcc` from the Arch repositories
-
-Because the libusb library is statically linked for Windows, you would need to get the libusb windows binaries from https://libusb.info/
-
-Paste the contents of libusb-MinGW-x64 folder into /usr/x86_64-w64-mingw32 (MINGW_DIR in Makefile)
-
+```bash
+brew install --cask tunnelblick
+```
 
 ### Notes
 
