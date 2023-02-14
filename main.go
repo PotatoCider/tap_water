@@ -226,7 +226,7 @@ func main() {
 				for {
 					if _, err := io.Copy(usbWriter, tap_iface); err != nil {
 						log.Println("writeStream err:", err)
-						if finish || err == io.ErrClosedPipe || err == gousb.ErrorIO || err == gousb.TransferNoDevice {
+						if finish || err == io.ErrClosedPipe || err == gousb.ErrorIO || err == gousb.TransferNoDevice || err == gousb.ErrorNoDevice {
 							break
 						}
 					}
@@ -238,7 +238,7 @@ func main() {
 				for {
 					if _, err := io.Copy(tap_iface, usbReader); err != nil {
 						log.Println("readStream err:", err)
-						if finish || err == io.ErrClosedPipe || err == gousb.ErrorIO || err == gousb.TransferNoDevice {
+						if finish || err == io.ErrClosedPipe || err == gousb.ErrorIO || err == gousb.TransferNoDevice || err == gousb.ErrorNoDevice {
 							break
 						}
 					}
