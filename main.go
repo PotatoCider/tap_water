@@ -41,8 +41,8 @@ func main() {
 	flag.BoolVar(&use_tun, "tun", false, "Use TUN instead of TAP adapter")
 	flag.BoolVar(&wait_plug, "wait", false, "Wait for USB plug-in")
 	flag.BoolVar(&dhcp, "dhcp", false, "Use DHCP")
-	flag.BoolVar(&use_stream, "stream", false, "Use Buffering (needed when both sides are running tap_water")
-	flag.BoolVar(&tuntaposx, "tuntaposx", false, "Use macos tuntaposx driver")
+	flag.BoolVar(&use_stream, "stream", false, "Use Buffering (doesn't work with plusb)")
+	flag.BoolVar(&tuntaposx, "tuntaposx", false, "Use macos tuntaposx driver (required for TAP)")
 
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s [flags...]\n", os.Args[0])
@@ -51,7 +51,6 @@ func main() {
 	flag.Parse()
 
 	// Initialize TAP virtual network interface
-
 	cfg := GetPlatformConfig(iface_name, persist, use_multiqueue, ip_address, tuntaposx)
 	if use_tun {
 		cfg.DeviceType = water.TUN
@@ -113,6 +112,7 @@ func main() {
 				if err != nil {
 					log.Fatalf("%s.Interface(0, 0): %v", cfg, err)
 				}
+				defer dev_iface.Close()
 			} else {
 				// Claim interface 0
 				var done func()

@@ -25,6 +25,9 @@ Works out of the box with Linux.
 ### Windows
 You would need to install the OpenVPN TAP drivers from https://openvpn.net/community-downloads/. The OpenVPN client is not needed.
 
+### MacOS
+You would need to install the Tunnelblink tun/tap extensions.
+
 ### Cross-Compilation
 In order to cross compile, you would need to have `mingw-w64-gcc` from the Arch repositories
 
